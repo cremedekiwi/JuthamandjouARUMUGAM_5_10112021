@@ -20,21 +20,65 @@ fetch('http://localhost:3000/api/products')
     let title = document.getElementById('title');
     let price = document.getElementById('price');
     let description = document.getElementById('description');
+    let colors = document.getElementById('colors');
 
     // Affectation des données de l'API
     image[0].innerHTML = `<img src="${myArray.imageUrl}" alt="${myArray.altTxt}">`;
     title.innerHTML = myArray.name;
     price.innerHTML = myArray.price;
     description.innerHTML = myArray.description;
-
     // Liste déroulante
-
-    let option = document.getElementsByTagName('option');
-
     for (i = 0; i < myArray.colors.length; i++) {
-      option[0].insertAdjacentHTML(
-        'afterend',
+      colors.insertAdjacentHTML(
+        'beforeend',
         `<option value="${myArray.colors[i]}">${myArray.colors[i]}</option>`
       );
     }
+
+    // Gestion du panier
+    // Liste déroulante
+    const idForm = document.querySelector('#colors');
+    const quantity = document.querySelector('#quantity');
+    const sendCart = document.querySelector('#addToCart');
+
+    sendCart.addEventListener('click', (event) => {
+      const formChoice = idForm.value;
+
+      // Récuperer les valeurs du produit dans un objet
+      let optionProduct = {
+        _id: id,
+        qty: quantity.value,
+        colors: formChoice,
+      };
+
+      // Local Storage
+      let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'));
+
+      // Ajouter un produit sélectionné dans le localStorage
+      const addProductLocalStorage = () => {
+        saveProductLocalStorage.push(optionProduct);
+        localStorage.setItem(
+          'product',
+          JSON.stringify(saveProductLocalStorage)
+        );
+      };
+
+      // Si déjà un produit dans le local storage
+      if (saveProductLocalStorage) {
+        addProductLocalStorage();
+      }
+      // Si pas de produit dans le local storage, créer le tableau
+      else {
+        saveProductLocalStorage = [];
+        addProductLocalStorage();
+      }
+
+      console.log(saveProductLocalStorage);
+
+      // for (i = 0; i < saveProductLocalStorage.length; i++) {
+      //   // test = saveProductLocalStorage[i]._id;
+      //   let test = saveProductLocalStorage[i].qty++;
+      //   console.log(test);
+      // }
+    });
   });
