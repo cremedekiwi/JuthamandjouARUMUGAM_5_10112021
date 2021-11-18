@@ -63,22 +63,43 @@ fetch('http://localhost:3000/api/products')
         );
       };
 
-      // Si déjà un produit dans le local storage
-      if (saveProductLocalStorage) {
-        addProductLocalStorage();
-      }
-      // Si pas de produit dans le local storage, créer le tableau
-      else {
-        saveProductLocalStorage = [];
-        addProductLocalStorage();
-      }
+      // Modifier un produit sélectionné dans le localStorage
+      const modifyProductLocalStorage = () => {
+        // Trouver l'index d'une couleur
+        let indexColor = saveProductLocalStorage
+          .map((e) => e.colors)
+          .indexOf(optionProduct.colors);
 
-      console.log(saveProductLocalStorage);
+        saveProductLocalStorage.splice(indexColor, 1, optionProduct);
+        localStorage.setItem(
+          'product',
+          JSON.stringify(saveProductLocalStorage)
+        );
+      };
 
-      // for (i = 0; i < saveProductLocalStorage.length; i++) {
-      //   // test = saveProductLocalStorage[i]._id;
-      //   let test = saveProductLocalStorage[i].qty++;
-      //   console.log(test);
-      // }
+      // SI couleur non définie & quantité à 0, ne rien faire
+      if (optionProduct.colors !== '' && optionProduct.qty > 0) {
+        // SI le tableau existe, AJOUTER le PRODUIT
+        if (saveProductLocalStorage) {
+          // SI la couleur existe, MODIFIER le produit
+          if (
+            Object.values(optionProduct).includes(
+              saveProductLocalStorage[0].colors
+            )
+          ) {
+            modifyProductLocalStorage();
+            console.log('modifier');
+            // SINON ajouter le produit
+          } else {
+            addProductLocalStorage();
+            console.log('ajouter');
+          }
+          // SINON créer le tableau puis AJOUTER le produit
+        } else {
+          saveProductLocalStorage = [];
+          addProductLocalStorage();
+          console.log('créer');
+        }
+      }
     });
   });
