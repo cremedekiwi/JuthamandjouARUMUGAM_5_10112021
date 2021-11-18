@@ -3,7 +3,7 @@ fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
   .then((data) => {
     // Variables
-    let product = document.getElementById('items');
+    let product = document.getElementById('items')
 
     // Création des produits : on fait une boucle pour ajouter dans le DOM chaque produit
     for (i = 0; i < data.length; i++) {
@@ -14,6 +14,6 @@ fetch('http://localhost:3000/api/products')
         <h3 class="productName">${data[i].name}</h3>
         <p class="productDescription">${data[i].description}</p>
       </article>
-    </a>`;
+    </a>`
     }
-  });
+  })
