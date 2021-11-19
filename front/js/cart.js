@@ -1,9 +1,9 @@
+// Sélectionne la div pour afficher les articles
 let cartItems = document.querySelector('#cart__items')
-
 // Récupère les données du localStorage
 let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 
-// Boucle avec tout les produits du Storage
+// Affiche tout les produits du pannier
 for (let i = 0; i < saveProductLocalStorage.length; i++) {
   cartItems.innerHTML += `<article
       class="cart__item"
@@ -43,24 +43,47 @@ for (let i = 0; i < saveProductLocalStorage.length; i++) {
 let deleteItemContainer = [...document.getElementsByClassName('deleteItem')]
 let quantityContainer = [...document.getElementsByClassName('itemQuantity')]
 
+// Supprime le produit
 deleteItemContainer.forEach((item, index) => {
   item.addEventListener('click', () => {
-    // Supprime dans le DOM
+    // Dans le DOM
     let pickArticle = deleteItemContainer[index].closest('.cart__item')
     pickArticle.remove()
-    // Supprime dans le local storage
+    // Dans le local storage
     saveProductLocalStorage.splice(index, 1)
     localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
     location.reload()
   })
 })
 
+// Modifie la quantité
 quantityContainer.forEach((item, index) => {
   // Au click, modifie l'item sur le LocalStorage
   item.addEventListener('click', () => {
     saveProductLocalStorage[index].qty = quantityContainer[index].value
     localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
+    location.reload()
   })
 })
 
-console.log(saveProductLocalStorage[0])
+// Total Articles
+let sumProduct = 0
+
+for (let q = 0; q < saveProductLocalStorage.length; q++) {
+  let quantityLoop = parseInt(saveProductLocalStorage[q].qty)
+  sumProduct += quantityLoop
+}
+
+let totalQuantity = document.querySelector('#totalQuantity')
+totalQuantity.innerHTML = sumProduct
+
+// Total Money
+let sumMoney = 0
+
+for (let m = 0; m < saveProductLocalStorage.length; m++) {
+  let moneyLoop = parseInt(saveProductLocalStorage[m].price)
+  sumMoney += moneyLoop
+}
+
+let totalMoney = document.querySelector('#totalPrice')
+totalMoney.innerHTML = sumMoney
