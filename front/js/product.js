@@ -70,7 +70,11 @@ fetch('http://localhost:3000/api/products')
       }
 
       // SI la couleur est vide et que la quantité est 0, ne rien faire
-      if (optionProduct.colors == '' || optionProduct.qty == 0) {
+      if (
+        optionProduct.colors == '' ||
+        optionProduct.qty <= 0 ||
+        optionProduct.qty > 100
+      ) {
         console.log('pas de valeurs')
       } else {
         // SI pas de produit dans le LS, crée le tableau
