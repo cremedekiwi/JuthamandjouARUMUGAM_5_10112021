@@ -1,15 +1,11 @@
-// Connexion vers l'API
-fetch('http://localhost:3000/api/products')
-  .then((response) => response.json())
-  .then((data) => {
-    let cartItems = document.querySelector('#cart__items')
+let cartItems = document.querySelector('#cart__items')
 
-    // Récupère les données du localStorage
-    let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+// Récupère les données du localStorage
+let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 
-    // Boucle avec tout les produits du Storage
-    for (let i = 0; i < saveProductLocalStorage.length; i++) {
-      cartItems.innerHTML += `<article
+// Boucle avec tout les produits du Storage
+for (let i = 0; i < saveProductLocalStorage.length; i++) {
+  cartItems.innerHTML += `<article
       class="cart__item"
       data-id="${saveProductLocalStorage[i]._id}"
       data-color="${saveProductLocalStorage[i].colors}"
@@ -40,31 +36,31 @@ fetch('http://localhost:3000/api/products')
           </div>
         </div>
       </div>
-    </article>;`
-    }
+    </article>`
+}
 
-    // Stock les éléments dans des tableaux
-    let deleteItemContainer = [...document.getElementsByClassName('deleteItem')]
-    let quantity = [...document.getElementsByClassName('itemQuantity')]
+// Stock les éléments dans des tableaux
+let deleteItemContainer = [...document.getElementsByClassName('deleteItem')]
+let quantityContainer = [...document.getElementsByClassName('itemQuantity')]
 
-    // Boucle dans le tableau
-    deleteItemContainer.forEach((item, index) => {
-      item.addEventListener('click', () => {
-        // Au click, supprime l'item dans le DOM et sur le LocalStorage
-        let pickArticle = deleteItemContainer[index].closest('.cart__item')
-        pickArticle.remove()
-        saveProductLocalStorage.splice(index, 1)
-        // UP sur le local storage la supression
-        localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
-      })
-    })
-
-    // Boucle dans le tableau
-    quantity.forEach((item, index) => {
-      // Au click, modifie l'item sur le LocalStorage
-      item.addEventListener('click', () => {
-        saveProductLocalStorage[index].qty = quantity[index].value
-        localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
-      })
-    })
+deleteItemContainer.forEach((item, index) => {
+  item.addEventListener('click', () => {
+    // Supprime dans le DOM
+    let pickArticle = deleteItemContainer[index].closest('.cart__item')
+    pickArticle.remove()
+    // Supprime dans le local storage
+    saveProductLocalStorage.splice(index, 1)
+    localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
+    location.reload()
   })
+})
+
+quantityContainer.forEach((item, index) => {
+  // Au click, modifie l'item sur le LocalStorage
+  item.addEventListener('click', () => {
+    saveProductLocalStorage[index].qty = quantityContainer[index].value
+    localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
+  })
+})
+
+console.log(saveProductLocalStorage[0])
