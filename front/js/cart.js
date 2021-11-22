@@ -4,9 +4,11 @@ let cartItems = document.querySelector('#cart__items')
 let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 
 // Affiche tout les produits du pannier
-if (saveProductLocalStorage !== null) {
+let products = []
+if (saveProductLocalStorage) {
   for (let i = 0; i < saveProductLocalStorage.length; i++) {
-    cartItems.innerHTML += `<article
+    if (cartItems) {
+      cartItems.innerHTML += `<article
       class="cart__item"
       data-id="${saveProductLocalStorage[i]._id}"
       data-color="${saveProductLocalStorage[i].colors}"
@@ -38,6 +40,9 @@ if (saveProductLocalStorage !== null) {
         </div>
       </div>
     </article>`
+    }
+    let productsId = [saveProductLocalStorage[i]._id]
+    products.push(productsId)
   }
 }
 
@@ -83,8 +88,10 @@ if (saveProductLocalStorage !== null) {
   }
 }
 
-totalQuantity.innerHTML = sumProduct
-totalMoney.innerHTML = sumMoney
+if (totalQuantity && totalMoney) {
+  totalQuantity.innerHTML = sumProduct
+  totalMoney.innerHTML = sumMoney
+}
 
 // Formulaire Contact
 
@@ -127,7 +134,6 @@ addEventListener('change', () => {
     } else {
       text.innerHTML = 'Merci de rentrer un nom valide'
       text.style.color = '#fbbcbc'
-      lastName = ''
     }
     if (lastName == '') {
       text.innerHTML = ''
@@ -146,7 +152,6 @@ addEventListener('change', () => {
       text.innerHTML =
         'Merci de rentrer une adresse valide : numéro + rue/bd/av + code postal'
       text.style.color = '#fbbcbc'
-      address = ''
     }
     if (address == '') {
       text.innerHTML = ''
@@ -164,7 +169,6 @@ addEventListener('change', () => {
     } else {
       text.innerHTML = 'Merci de rentrer une ville valide'
       text.style.color = '#fbbcbc'
-      city = ''
     }
     if (city == '') {
       text.innerHTML = ''
@@ -189,20 +193,21 @@ addEventListener('change', () => {
     } else {
       text.innerHTML = 'Merci de rentrer une adresse valide'
       text.style.color = '#fbbcbc'
-      mail = ''
     }
     if (mail == '') {
       text.innerHTML = ''
     }
   }
 
-  let contact = {
-    prenom: validFirstName(),
-    nom: validLastName(),
-    adresse: validAdress(),
-    ville: validCity(),
+  const contact = {
+    firstName: validFirstName(),
+    lastName: validLastName(),
+    address: validAdress(),
+    city: validCity(),
     email: validEmail(),
   }
+
+  console.log(contact)
 
   let sendContact = document.querySelector('#order')
 
@@ -210,7 +215,6 @@ addEventListener('change', () => {
     e.preventDefault(e)
 
     let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
-    // console.log(saveContactLocalStorage)
 
     let addContactLocalStorage = () => {
       saveContactLocalStorage.push(contact)
@@ -218,13 +222,13 @@ addEventListener('change', () => {
     }
 
     if (
-      contact.prenom == undefined ||
-      contact.nom == undefined ||
-      contact.adresse == undefined ||
-      contact.ville == undefined ||
+      contact.firstName == undefined ||
+      contact.lastName == undefined ||
+      contact.address == undefined ||
+      contact.city == undefined ||
       contact.email == undefined
     ) {
-      console.log('wait')
+      return false
     } else {
       // SI pas de contact dans le LS, crée le tableau
       if (!saveContactLocalStorage) {
@@ -235,5 +239,56 @@ addEventListener('change', () => {
         console.log('Contact déjà crée')
       }
     }
+
+    const toSend = {
+      contact,
+      products,
+    }
+
+    // Envoi de l'objet vers le serveur
+    const promise01 = fetch('http://localhost:3000/api/products/order', {
+      method: 'POST',
+      body: JSON.stringify(toSend),
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+
+    // Pour voir le résultat du serveur dans la console
+    promise01.then(async (response) => {
+      try {
+        const content = await response.json()
+        console.log('contenu de response')
+        console.log(content)
+
+        if (response.ok) {
+          console.log(`Résultat de response.ok : ${response.ok}`)
+
+          // Récupération de l'ID de la response du serveur
+          console.log('id de response')
+          console.log(content.orderId)
+
+          // Aller vers la page confirmation
+          window.location = `../html/confirmation.html?id=${content.orderId}`
+          // localStorage.clear()
+        } else {
+          console.log(`Réponse du serveur : ${response.status}`)
+        }
+      } catch (e) {
+        console.log('Erreur qui vient du catch()')
+        console.log(e)
+      }
+    })
   })
 })
+
+// Confirmation ---------------------------------------------------------------------------
+// Récupération de l'ID
+const str = window.location.href
+const url = new URL(str)
+const id = url.searchParams.get('id')
+
+const idSelector = document.querySelector('#orderId')
+if (idSelector) {
+  idSelector.innerHTML = id
+}
