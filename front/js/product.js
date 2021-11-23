@@ -1,47 +1,44 @@
 // Récupérer l'id dans l'url
-let str = window.location.href
-let url = new URL(str)
-let id = url.searchParams.get('id')
+let id = new URL(window.location.href).searchParams.get('id')
 
-// Connexion vers l'API
 fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
   .then((data) => {
-    // Trouver le tableau correspondant à l'ID dans l'API
+    // Entrée : ID de l'URL (searchParams)
+    // Sortie : l'objet qui correspond à ID dans data
     function findObject(id) {
-      return data.find((o) => o._id === id)
+      return data.find((object) => object._id === id)
     }
 
     let myObject = findObject(id)
 
-    // VAR des éléments HTML
-    let image = document.getElementsByClassName('item__img')[0]
+    // Sélecteurs HTML
+    let item__img = document.getElementsByClassName('item__img')[0]
     let title = document.getElementById('title')
     let price = document.getElementById('price')
     let description = document.getElementById('description')
     let colors = document.getElementById('colors')
 
-    // Affectation des données de l'API
-    image.innerHTML = `<img src="${myObject.imageUrl}" alt="${myObject.altTxt}">`
+    // Affectation des données d'un produit
+    item__img.innerHTML = `<img src="${myObject.imageUrl}" alt="${myObject.altTxt}">`
     title.innerHTML = myObject.name
     price.innerHTML = myObject.price
     description.innerHTML = myObject.description
-    // Liste déroulante
-    for (i = 0; i < myObject.colors.length; i++) {
+    // Couleur & quantité
+    for (let i in myObject.colors) {
       colors.insertAdjacentHTML(
         'beforeend',
         `<option value="${myObject.colors[i]}">${myObject.colors[i]}</option>`
       )
     }
 
-    // Gestion du panier
-    // Liste déroulante
+    // Sélecteurs détails Images
+    let imageSrc = document.getElementsByTagName('img')[5].src
+    let imageAlt = document.getElementsByTagName('img')[5].alt
+    // Sélecteurs couleur, quantité & bouton ajouter
     let idForm = document.querySelector('#colors')
     let quantity = document.querySelector('#quantity')
     let sendCart = document.querySelector('#addToCart')
-    // Images
-    let imageSrc = document.getElementsByTagName('img')[5].src
-    let imageAlt = document.getElementsByTagName('img')[5].alt
 
     sendCart.addEventListener('click', (event) => {
       // Récuperer les valeurs du produit dans un objet

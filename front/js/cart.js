@@ -1,12 +1,14 @@
-// Sélectionne la div pour afficher les articles
+// Sélectionne la div pour afficher les articles ------------------------------------------
 let cartItems = document.querySelector('#cart__items')
-// Récupère les données du localStorage
+
+// Récupère les données du localStorage ---------------------------------------------------
 let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 
-// Affiche tout les produits du pannier
+// Crée un tableau product vide -----------------------------------------------------------
 let products = []
-if (saveProductLocalStorage) {
-  for (let i = 0; i < saveProductLocalStorage.length; i++) {
+// Affiche tout les produits du panier ----------------------------------------------------
+if (document.URL.includes('cart.html')) {
+  for (let i in saveProductLocalStorage) {
     if (cartItems) {
       cartItems.innerHTML += `<article
       class="cart__item"
@@ -41,29 +43,30 @@ if (saveProductLocalStorage) {
       </div>
     </article>`
     }
+    // Mets dans le tableau products les ID du panier
     let productsId = [saveProductLocalStorage[i]._id]
     products.push(productsId)
   }
 }
 
-// Stock les éléments dans des tableaux
+// Stock dans des tableaux les éléments du DOM à supprimer ou modifier --------------------
 let deleteItemContainer = [...document.getElementsByClassName('deleteItem')]
 let quantityContainer = [...document.getElementsByClassName('itemQuantity')]
 
-// Supprime le produit
+// Supprime le produit --------------------------------------------------------------------
 deleteItemContainer.forEach((item, index) => {
   item.addEventListener('click', () => {
-    // Dans le DOM
+    // closest permet de sélectionner la classe pour la supprimer
     let pickArticle = deleteItemContainer[index].closest('.cart__item')
     pickArticle.remove()
-    // Dans le local storage
+    // splice permet de modifier la quantité, obliger de recharger pour reset index
     saveProductLocalStorage.splice(index, 1)
     localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
     location.reload()
   })
 })
 
-// Modifie la quantité
+// Modifie la quantité --------------------------------------------------------------------
 quantityContainer.forEach((item, index) => {
   // Au click, modifie l'item sur le LocalStorage
   item.addEventListener('click', () => {
@@ -73,31 +76,25 @@ quantityContainer.forEach((item, index) => {
   })
 })
 
-// Total des articles et somme
+// Total articles et somme ----------------------------------------------------------------
 let sumProduct = 0
 let sumMoney = 0
 let totalQuantity = document.querySelector('#totalQuantity')
 let totalMoney = document.querySelector('#totalPrice')
 
-if (saveProductLocalStorage !== null) {
-  for (let q = 0; q < saveProductLocalStorage.length; q++) {
+if (document.URL.includes('cart.html')) {
+  for (let q in saveProductLocalStorage) {
     let quantityLoop = parseInt(saveProductLocalStorage[q].qty)
     let moneyLoop = parseInt(saveProductLocalStorage[q].price)
     sumProduct += quantityLoop
     sumMoney += moneyLoop * quantityLoop
   }
-}
-
-if (totalQuantity && totalMoney) {
   totalQuantity.innerHTML = sumProduct
   totalMoney.innerHTML = sumMoney
 }
 
-// Formulaire Contact
-
+// Formulaire Contact ---------------------------------------------------------------------
 addEventListener('change', () => {
-  // event.preventDefault(event)
-
   let firstName = document.getElementById('firstName').value
   let lastName = document.getElementById('lastName').value
   let address = document.getElementById('address').value
@@ -119,8 +116,6 @@ addEventListener('change', () => {
     if (firstName == '') {
       text.innerHTML = ''
     }
-
-    console.log(text.innerHTML)
   }
 
   function validLastName() {
@@ -199,6 +194,7 @@ addEventListener('change', () => {
     }
   }
 
+  // Crée l'objet contact avec des fonctions pour valeurs qui vérifie chaque entrée -------
   const contact = {
     firstName: validFirstName(),
     lastName: validLastName(),
@@ -207,12 +203,10 @@ addEventListener('change', () => {
     email: validEmail(),
   }
 
-  console.log(contact)
-
   let sendContact = document.querySelector('#order')
 
   sendContact.addEventListener('click', (e) => {
-    e.preventDefault(e)
+    e.preventDefault()
 
     let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 
@@ -234,7 +228,7 @@ addEventListener('change', () => {
       if (!saveContactLocalStorage) {
         saveContactLocalStorage = []
         addContactLocalStorage()
-        console.log('crée le tableau')
+        console.log('Crée le tableau')
       } else {
         console.log('Contact déjà crée')
       }
@@ -246,7 +240,7 @@ addEventListener('change', () => {
     }
 
     // Envoi de l'objet vers le serveur
-    const promise01 = fetch('http://localhost:3000/api/products/order', {
+    const promiseOne = fetch('http://localhost:3000/api/products/order', {
       method: 'POST',
       body: JSON.stringify(toSend),
       headers: {
@@ -255,28 +249,20 @@ addEventListener('change', () => {
     })
 
     // Pour voir le résultat du serveur dans la console
-    promise01.then(async (response) => {
+    promiseOne.then(async (response) => {
       try {
         const content = await response.json()
-        console.log('contenu de response')
         console.log(content)
 
         if (response.ok) {
-          console.log(`Résultat de response.ok : ${response.ok}`)
-
-          // Récupération de l'ID de la response du serveur
-          console.log('id de response')
-          console.log(content.orderId)
-
           // Aller vers la page confirmation
           window.location = `../html/confirmation.html?id=${content.orderId}`
-          // localStorage.clear()
+          localStorage.removeItem('product')
         } else {
-          console.log(`Réponse du serveur : ${response.status}`)
+          console.log(`Réponse du serveur : `, response.status)
         }
       } catch (e) {
-        console.log('Erreur qui vient du catch()')
-        console.log(e)
+        console.log('Erreur qui vient du catch : ', e)
       }
     })
   })
@@ -284,11 +270,9 @@ addEventListener('change', () => {
 
 // Confirmation ---------------------------------------------------------------------------
 // Récupération de l'ID
-const str = window.location.href
-const url = new URL(str)
-const id = url.searchParams.get('id')
+const id = new URL(window.location.href).searchParams.get('id')
 
 const idSelector = document.querySelector('#orderId')
-if (idSelector) {
+if (document.URL.includes('confirmation.html')) {
   idSelector.innerHTML = id
 }

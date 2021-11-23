@@ -1,13 +1,11 @@
-// Connexion vers l'API
+let items = document.getElementById('items')
+
 fetch('http://localhost:3000/api/products')
   .then((response) => response.json())
   .then((data) => {
-    // Variables
-    let product = document.getElementById('items')
-
-    // Création des produits : on fait une boucle pour ajouter dans le DOM chaque produit
-    for (i = 0; i < data.length; i++) {
-      product.innerHTML += `
+    // Affiche tout les produits dans le DOM depuis l'API
+    for (let i in data) {
+      items.innerHTML += `
     <a href="./product.html?id=${data[i]._id}">
       <article>
         <img src="${data[i].imageUrl}" alt="${data[i].altTxt}">
