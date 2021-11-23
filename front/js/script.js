@@ -1,11 +1,8 @@
-let items = document.getElementById('items')
-
-fetch('http://localhost:3000/api/products')
-  .then((response) => response.json())
-  .then((data) => {
-    // Affiche tout les produits dans le DOM depuis l'API
-    for (let i in data) {
-      items.innerHTML += `
+// *** Affiche tout les produits
+let showProduct = (data) => {
+  let items = document.getElementById('items')
+  for (let i in data) {
+    items.innerHTML += `
     <a href="./product.html?id=${data[i]._id}">
       <article>
         <img src="${data[i].imageUrl}" alt="${data[i].altTxt}">
@@ -13,5 +10,12 @@ fetch('http://localhost:3000/api/products')
         <p class="productDescription">${data[i].description}</p>
       </article>
     </a>`
-    }
+  }
+}
+
+// *** Connexion à l'API
+fetch('http://localhost:3000/api/products')
+  .then((response) => response.json())
+  .then((data) => {
+    showProduct(data)
   })
