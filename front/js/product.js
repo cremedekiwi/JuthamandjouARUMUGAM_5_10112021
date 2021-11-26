@@ -3,14 +3,10 @@ let id = new URL(window.location.href).searchParams.get('id')
 fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
-		// *** Trouver l'objet correspondant à id
-		// Entrée : ID de l'URL (searchParams)
-		// Sortie : l'objet qui correspond à ID dans data
-		let findObject = (id) => {
-			return data.find((object) => object._id === id)
-		}
-
-		let myObject = findObject(id)
+		// *** Trouver l'objet correspondant à l'ID
+		// object._id vient de l'API
+		// id vient du searchParams
+		let myObject = data.find((object) => object._id === id)
 
 		// *** Injection
 		// Sélecteurs HTML

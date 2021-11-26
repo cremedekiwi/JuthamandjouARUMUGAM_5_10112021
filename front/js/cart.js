@@ -14,13 +14,12 @@ fetch('http://localhost:3000/api/products')
 		if (document.URL.includes('cart.html')) {
 			for (let i in saveProductLocalStorage) {
 				// *** Trouver l'objet correspondant à l'ID
+				// object._id : API
+				// id : searchParams
 				let id = saveProductLocalStorage[i]._id
-				// Entrée : ID de l'URL (searchParams)
-				// Sortie : l'objet qui correspond à ID dans data
 				function findObject(id) {
 					return data.find((object) => object._id === id)
 				}
-
 				let myObject = findObject(id)
 
 				if (cartItems) {
@@ -142,15 +141,22 @@ fetch('http://localhost:3000/api/products')
 
 			function validFirstName() {
 				let text = document.getElementById('firstNameErrorMsg')
-				let pattern = /^[a-z ,.'-]+$/i
+				let pattern = /^[a-zA-Z\-]+$/
+				let number = /^[a-zA-Z\-1-9]+$/
 
 				if (firstName.match(pattern)) {
 					text.innerHTML = 'Prénom valide'
 					text.style.color = '#00ff00'
 					return firstName
 				} else {
-					text.innerHTML = 'Merci de rentrer un prénom valide'
-					text.style.color = '#fbbcbc'
+					if (firstName.match(number)) {
+						text.innerHTML = 'Les chiffres ne sont pas tolérés'
+						text.style.color = '#fbbcbc'
+					} else {
+						text.innerHTML = 'Merci de rentrer un prénom valide'
+						text.style.color = '#fbbcbc'
+					}
+					localStorage.removeItem('contact')
 				}
 				if (firstName == '') {
 					text.innerHTML = ''
@@ -159,15 +165,22 @@ fetch('http://localhost:3000/api/products')
 
 			function validLastName() {
 				let text = document.getElementById('lastNameErrorMsg')
-				let pattern = /^[a-z ,.'-]+$/i
+				let pattern = /^[a-zA-Z\-]+$/
+				let number = /^[a-zA-Z\-1-9]+$/
 
 				if (lastName.match(pattern)) {
 					text.innerHTML = 'Nom valide'
 					text.style.color = '#00ff00'
 					return lastName
 				} else {
-					text.innerHTML = 'Merci de rentrer un nom valide'
-					text.style.color = '#fbbcbc'
+					if (lastName.match(number)) {
+						text.innerHTML = 'Les chiffres ne sont pas tolérés'
+						text.style.color = '#fbbcbc'
+					} else {
+						text.innerHTML = 'Merci de rentrer un nom valide'
+						text.style.color = '#fbbcbc'
+					}
+					localStorage.removeItem('contact')
 				}
 				if (lastName == '') {
 					text.innerHTML = ''
@@ -184,8 +197,9 @@ fetch('http://localhost:3000/api/products')
 					return address
 				} else {
 					text.innerHTML =
-						'Merci de rentrer une adresse valide : numéro + rue/bd/av + code postal'
+						'Merci de rentrer une adresse valide : numéro voie code postal'
 					text.style.color = '#fbbcbc'
+					localStorage.removeItem('contact')
 				}
 				if (address == '') {
 					text.innerHTML = ''
@@ -203,6 +217,7 @@ fetch('http://localhost:3000/api/products')
 				} else {
 					text.innerHTML = 'Merci de rentrer une ville valide'
 					text.style.color = '#fbbcbc'
+					localStorage.removeItem('contact')
 				}
 				if (city == '') {
 					text.innerHTML = ''
@@ -227,13 +242,14 @@ fetch('http://localhost:3000/api/products')
 				} else {
 					text.innerHTML = 'Merci de rentrer une adresse valide'
 					text.style.color = '#fbbcbc'
+					localStorage.removeItem('contact')
 				}
 				if (mail == '') {
 					text.innerHTML = ''
 				}
 			}
 
-			// Crée l'objet contact avec des fonctions pour valeurs qui vérifie chaque entrée
+			// Crée l'objet contact, les valeurs sont vérifiés par les fonctions
 			const contact = {
 				firstName: validFirstName(),
 				lastName: validLastName(),
@@ -242,15 +258,22 @@ fetch('http://localhost:3000/api/products')
 				email: validEmail(),
 			}
 
-			let sendContact = document.querySelector('#order')
-
 			let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 
+			// Ajoute le nouveau contact
 			let addContactLocalStorage = () => {
 				saveContactLocalStorage.push(contact)
 				localStorage.setItem('contact', JSON.stringify(saveContactLocalStorage))
 			}
 
+			// Modifie le contact
+			let modifyContactLocalStorage = () => {
+				saveContactLocalStorage = contact
+				localStorage.setItem('contact', JSON.stringify(saveContactLocalStorage))
+				console.log('Contact déjà crée')
+			}
+
+			// Si l'objet a une key non défini, ne pas exécuter le code
 			if (
 				contact.firstName == undefined ||
 				contact.lastName == undefined ||
@@ -265,13 +288,15 @@ fetch('http://localhost:3000/api/products')
 					saveContactLocalStorage = []
 					console.log('Crée le tableau')
 					addContactLocalStorage()
-				} else {
-					saveContactLocalStorage = []
-					addContactLocalStorage()
-					console.log('Contact déjà crée')
+				}
+				// Modifie le contact en temps réel
+				else {
+					modifyContactLocalStorage()
 				}
 			}
 
+			// *** Envoi de l'objet vers le serveur
+			let sendContact = document.querySelector('#order')
 			sendContact.addEventListener('click', (e) => {
 				e.preventDefault()
 
@@ -280,7 +305,6 @@ fetch('http://localhost:3000/api/products')
 					products,
 				}
 
-				// Envoi de l'objet vers le serveur
 				const promiseOne = fetch('http://localhost:3000/api/products/order', {
 					method: 'POST',
 					body: JSON.stringify(toSend),
