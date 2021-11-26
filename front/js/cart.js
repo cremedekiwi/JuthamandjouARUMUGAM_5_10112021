@@ -244,39 +244,36 @@ fetch('http://localhost:3000/api/products')
 
 			let sendContact = document.querySelector('#order')
 
+			let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
+
+			let addContactLocalStorage = () => {
+				saveContactLocalStorage.push(contact)
+				localStorage.setItem('contact', JSON.stringify(saveContactLocalStorage))
+			}
+
+			if (
+				contact.firstName == undefined ||
+				contact.lastName == undefined ||
+				contact.address == undefined ||
+				contact.city == undefined ||
+				contact.email == undefined
+			) {
+				return false
+			} else {
+				// SI pas de contact dans le localStorage, crée le tableau
+				if (!saveContactLocalStorage) {
+					saveContactLocalStorage = []
+					console.log('Crée le tableau')
+					addContactLocalStorage()
+				} else {
+					saveContactLocalStorage = []
+					addContactLocalStorage()
+					console.log('Contact déjà crée')
+				}
+			}
+
 			sendContact.addEventListener('click', (e) => {
 				e.preventDefault()
-
-				let saveContactLocalStorage = JSON.parse(
-					localStorage.getItem('contact')
-				)
-
-				let addContactLocalStorage = () => {
-					saveContactLocalStorage.push(contact)
-					localStorage.setItem(
-						'contact',
-						JSON.stringify(saveContactLocalStorage)
-					)
-				}
-
-				if (
-					contact.firstName == undefined ||
-					contact.lastName == undefined ||
-					contact.address == undefined ||
-					contact.city == undefined ||
-					contact.email == undefined
-				) {
-					return false
-				} else {
-					// SI pas de contact dans le localStorage, crée le tableau
-					if (!saveContactLocalStorage) {
-						saveContactLocalStorage = []
-						addContactLocalStorage()
-						console.log('Crée le tableau')
-					} else {
-						console.log('Contact déjà crée')
-					}
-				}
 
 				const toSend = {
 					contact,
@@ -296,12 +293,12 @@ fetch('http://localhost:3000/api/products')
 				promiseOne.then(async (response) => {
 					try {
 						const content = await response.json()
-						console.log(content)
+						// console.log('content ', content)
 
 						if (response.ok) {
 							// Aller vers la page confirmation
 							window.location = `../html/confirmation.html?id=${content.orderId}`
-							// localStorage.clear()
+							localStorage.clear()
 						} else {
 							console.log(`Réponse du serveur : `, response.status)
 						}
