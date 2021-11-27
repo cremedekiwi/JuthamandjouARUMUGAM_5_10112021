@@ -6,6 +6,7 @@ let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 // Crée un tableau produit vide
 let products = []
 
+// fetch('http://localhost:3000/api/products')
 fetch('https://cdk-kanap.herokuapp.com/api/products')
 	.then((response) => response.json())
 	.then((data) => {
@@ -310,13 +311,17 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 					products,
 				}
 
-				const promiseOne = fetch('http://localhost:3000/api/products/order', {
-					method: 'POST',
-					body: JSON.stringify(toSend),
-					headers: {
-						'Content-type': 'application/json',
-					},
-				})
+				// const promiseOne = fetch('http://localhost:3000/api/products/order', {
+				const promiseOne = fetch(
+					'https://cdk-kanap.herokuapp.com/api/products/order',
+					{
+						method: 'POST',
+						body: JSON.stringify(toSend),
+						headers: {
+							'Content-type': 'application/json',
+						},
+					}
+				)
 
 				// Pour voir le résultat du serveur dans la console
 				promiseOne.then(async (response) => {

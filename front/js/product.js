@@ -2,6 +2,7 @@
 let idProduct = new URL(window.location.href).searchParams.get('id')
 
 // *** Connextion API
+// fetch('http://localhost:3000/api/products')
 fetch('https://cdk-kanap.herokuapp.com/api/products')
 	.then((response) => response.json())
 	.then((data) => {
