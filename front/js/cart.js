@@ -1,64 +1,52 @@
+// Sélectionne le conteneur des articles
+let cartItems = document.querySelector('#cart__items')
+// Récupère les données du localStorage
+let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+// Crée un tableau produit vide
+let products = []
+
 fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
-		// *** Affiche le panier
-		// Sélectionne le conteneur des articles
-		let cartItems = document.querySelector('#cart__items')
+		// *** Trouver l'objet correspondant à l'ID | object._id : API | id : searchParams
+		let findObject = (id) => {
+			return data.find((object) => object._id === id)
+		}
 
-		// Récupère les données du localStorage
-		let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+		let showCart = () => {
+			// *** Affiche tout les produits du panier
+			if (document.URL.includes('cart.html')) {
+				for (let i in saveProductLocalStorage) {
+					let id = saveProductLocalStorage[i]._id
+					let myObject = findObject(id)
 
-		// Crée un tableau produit vide
-		let products = []
-		// Affiche tout les produits du panier
-		if (document.URL.includes('cart.html')) {
-			for (let i in saveProductLocalStorage) {
-				// *** Trouver l'objet correspondant à l'ID
-				// object._id : API
-				// id : searchParams
-				let id = saveProductLocalStorage[i]._id
-				function findObject(id) {
-					return data.find((object) => object._id === id)
+					cartItems.innerHTML += `
+						<article class="cart__item" data-id="${saveProductLocalStorage[i]._id}" data-color="${saveProductLocalStorage[i].colors}">
+            	<div class="cart__item__img">
+              	<img src="${myObject.imageUrl}" alt="${myObject.alttxt}" />
+            	</div>
+            	<div class="cart__item__content">
+              	<div class="cart__item__content__description">
+                	<h2>${myObject.name}</h2>
+                	<p>${saveProductLocalStorage[i].colors}</p>
+                	<p>${myObject.price}</p>
+              	</div>
+              	<div class="cart__item__content__settings">
+                	<div class="cart__item__content__settings__quantity">
+                  	<p>Qté :</p>
+                  	<input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${saveProductLocalStorage[i].qty}"/>
+                	</div>
+                	<div class="cart__item__content__settings__delete">
+                  	<p class="deleteItem">Supprimer</p>
+                	</div>
+             	 	</div>
+            	</div>
+         		 </article>`
+
+					// Mets dans le tableau produit les ID du panier
+					let productsId = [saveProductLocalStorage[i]._id]
+					products.push(productsId)
 				}
-				let myObject = findObject(id)
-
-				if (cartItems) {
-					cartItems.innerHTML += `<article
-            class="cart__item"
-            data-id="${saveProductLocalStorage[i]._id}"
-            data-color="${saveProductLocalStorage[i].colors}"
-          >
-            <div class="cart__item__img">
-              <img src="${myObject.imageUrl}" alt="${myObject.alttxt}" />
-            </div>
-            <div class="cart__item__content">
-              <div class="cart__item__content__description">
-                <h2>${myObject.name}</h2>
-                <p>${saveProductLocalStorage[i].colors}</p>
-                <p>${myObject.price}</p>
-              </div>
-              <div class="cart__item__content__settings">
-                <div class="cart__item__content__settings__quantity">
-                  <p>Qté :</p>
-                  <input
-                    type="number"
-                    class="itemQuantity"
-                    name="itemQuantity"
-                    min="1"
-                    max="100"
-                    value="${saveProductLocalStorage[i].qty}"
-                  />
-                </div>
-                <div class="cart__item__content__settings__delete">
-                  <p class="deleteItem">Supprimer</p>
-                </div>
-              </div>
-            </div>
-          </article>`
-				}
-				// Mets dans le tableau produit les ID du panier
-				let productsId = [saveProductLocalStorage[i]._id]
-				products.push(productsId)
 			}
 		}
 
@@ -68,21 +56,28 @@ fetch('http://localhost:3000/api/products')
 			let deleteItemContainer = [
 				...document.getElementsByClassName('deleteItem'),
 			]
+			let pickArticle = [...document.querySelectorAll(`.cart__item`)]
 			// Supprime le produit
-			deleteItemContainer.forEach((item, index) => {
-				item.addEventListener('click', () => {
-					// closest permet de sélectionner la classe pour la supprimer
-					let pickArticle = deleteItemContainer[index].closest('.cart__item')
-					pickArticle.remove()
-					// splice permet de modifier la quantité ; recharger pour reset l'index
+			deleteItemContainer.forEach((element, index) => {
+				element.addEventListener('click', () => {
+					// localStorage
 					saveProductLocalStorage.splice(index, 1)
 					localStorage.setItem(
 						'product',
 						JSON.stringify(saveProductLocalStorage)
 					)
+					// DOM
+					pickArticle[index].remove()
+					console.log(pickArticle)
+
+					cart()
+					total()
 					location.reload()
 				})
 			})
+			if (!saveProductLocalStorage[0]) {
+				localStorage.removeItem('product')
+			}
 		}
 
 		// *** Modifie la quantité d'un produit
@@ -100,7 +95,8 @@ fetch('http://localhost:3000/api/products')
 						'product',
 						JSON.stringify(saveProductLocalStorage)
 					)
-					location.reload()
+					cart()
+					total()
 				})
 			})
 		}
@@ -118,8 +114,9 @@ fetch('http://localhost:3000/api/products')
 					let myObjectTotal = findObject(id)
 
 					let quantityLoop = parseInt(saveProductLocalStorage[q].qty)
-					let moneyLoop = parseInt(myObjectTotal.price)
 					sumProduct += quantityLoop
+
+					let moneyLoop = parseInt(myObjectTotal.price)
 					sumMoney += moneyLoop * quantityLoop
 				}
 				totalQuantity.innerHTML = sumProduct
@@ -127,19 +124,15 @@ fetch('http://localhost:3000/api/products')
 			}
 		}
 
+		showCart()
 		deleteProduct()
 		modifyProduct()
 		total()
 
 		// *** Formulaire Contact
 		addEventListener('change', () => {
-			let firstName = document.getElementById('firstName').value
-			let lastName = document.getElementById('lastName').value
-			let address = document.getElementById('address').value
-			let city = document.getElementById('city').value
-			let mail = document.getElementById('email').value
-
 			function validFirstName() {
+				let firstName = document.getElementById('firstName').value
 				let text = document.getElementById('firstNameErrorMsg')
 				let pattern = /^[a-zA-Z\-]+$/
 				let number = /^[a-zA-Z\-1-9]+$/
@@ -164,6 +157,7 @@ fetch('http://localhost:3000/api/products')
 			}
 
 			function validLastName() {
+				let lastName = document.getElementById('lastName').value
 				let text = document.getElementById('lastNameErrorMsg')
 				let pattern = /^[a-zA-Z\-]+$/
 				let number = /^[a-zA-Z\-1-9]+$/
@@ -188,6 +182,7 @@ fetch('http://localhost:3000/api/products')
 			}
 
 			function validAdress() {
+				let address = document.getElementById('address').value
 				let text = document.getElementById('addressErrorMsg')
 				let pattern = '([0-9a-zA-Z,. ]*) ?([0-9]{5}) ?([a-zA-Z]*)'
 
@@ -207,6 +202,7 @@ fetch('http://localhost:3000/api/products')
 			}
 
 			function validCity() {
+				let city = document.getElementById('city').value
 				let text = document.getElementById('cityErrorMsg')
 				let pattern = /^[a-z ,.'-]+$/i
 
@@ -225,6 +221,7 @@ fetch('http://localhost:3000/api/products')
 			}
 
 			function validEmail() {
+				let mail = document.getElementById('email').value
 				let text = document.getElementById('emailErrorMsg')
 				// ^ : début
 				// dans les crochets ce qu'on peut écrire, miniscule, majustucle, nombre, point, tiret, underscore
@@ -258,47 +255,55 @@ fetch('http://localhost:3000/api/products')
 				email: validEmail(),
 			}
 
-			let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
-
-			// Ajoute le nouveau contact
-			let addContactLocalStorage = () => {
-				saveContactLocalStorage.push(contact)
-				localStorage.setItem('contact', JSON.stringify(saveContactLocalStorage))
-			}
-
-			// Modifie le contact
-			let modifyContactLocalStorage = () => {
-				saveContactLocalStorage = contact
-				localStorage.setItem('contact', JSON.stringify(saveContactLocalStorage))
-				console.log('Contact déjà crée')
-			}
-
-			// Si l'objet a une key non défini, ne pas exécuter le code
-			if (
-				contact.firstName == undefined ||
-				contact.lastName == undefined ||
-				contact.address == undefined ||
-				contact.city == undefined ||
-				contact.email == undefined
-			) {
-				return false
-			} else {
-				// SI pas de contact dans le localStorage, crée le tableau
-				if (!saveContactLocalStorage) {
-					saveContactLocalStorage = []
-					console.log('Crée le tableau')
-					addContactLocalStorage()
-				}
-				// Modifie le contact en temps réel
-				else {
-					modifyContactLocalStorage()
-				}
-			}
-
-			// *** Envoi de l'objet vers le serveur
+			// *** Objet vers localStorage
 			let sendContact = document.querySelector('#order')
 			sendContact.addEventListener('click', (e) => {
 				e.preventDefault()
+
+				let saveContactLocalStorage = JSON.parse(
+					localStorage.getItem('contact')
+				)
+
+				// Ajoute le nouveau contact
+				let addContactLocalStorage = () => {
+					saveContactLocalStorage = []
+					saveContactLocalStorage.push(contact)
+					localStorage.setItem(
+						'contact',
+						JSON.stringify(saveContactLocalStorage)
+					)
+					console.log('Crée le tableau')
+				}
+
+				// Modifie le contact
+				let modifyContactLocalStorage = () => {
+					saveContactLocalStorage = contact
+					localStorage.setItem(
+						'contact',
+						JSON.stringify(saveContactLocalStorage)
+					)
+					console.log('Modifie le contact')
+				}
+
+				// Si l'objet a une key non défini, ne pas exécuter le code
+				if (
+					contact.firstName == undefined ||
+					contact.lastName == undefined ||
+					contact.address == undefined ||
+					contact.city == undefined ||
+					contact.email == undefined
+				) {
+					return false
+				} else {
+					// SI pas de contact dans le localStorage, crée le tableau
+					if (!saveContactLocalStorage) {
+						addContactLocalStorage()
+					}
+					// Modifie le contact en temps réel
+					else {
+						modifyContactLocalStorage()
+					}
+				}
 
 				const toSend = {
 					contact,
@@ -317,7 +322,7 @@ fetch('http://localhost:3000/api/products')
 				promiseOne.then(async (response) => {
 					try {
 						const content = await response.json()
-						// console.log('content ', content)
+						console.log('content ', content)
 
 						if (response.ok) {
 							// Aller vers la page confirmation
@@ -334,11 +339,32 @@ fetch('http://localhost:3000/api/products')
 		})
 	})
 
-// *** Confirmation de commande
-// Récupération de l'ID
-const orderId = new URL(window.location.href).searchParams.get('id')
+// *** Rajouter la quantité totale à côté du panier (nav bar)
+let cart = () => {
+	let panier = document
+		.getElementsByTagName('nav')[0]
+		.getElementsByTagName('li')[1]
 
-const idSelector = document.querySelector('#orderId')
-if (document.URL.includes('confirmation.html')) {
-	idSelector.innerHTML = orderId
+	let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+
+	let sum = 0
+	for (let q in saveProductLocalStorage) {
+		let loop = parseInt(saveProductLocalStorage[q].qty)
+		sum += loop
+	}
+
+	panier.innerHTML = `Panier <span id="test" style='color: red;'>${sum}</span>`
 }
+
+// *** Confirmation du numéro de commande
+let showCommand = () => {
+	const orderId = new URL(window.location.href).searchParams.get('id')
+
+	const idSelector = document.querySelector('#orderId')
+	if (document.URL.includes('confirmation.html')) {
+		idSelector.innerHTML = orderId
+	}
+}
+
+cart()
+showCommand()
