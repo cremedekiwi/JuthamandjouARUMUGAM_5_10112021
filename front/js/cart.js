@@ -5,7 +5,7 @@ let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 // Crée un tableau produit vide
 let products = []
 
-fetch('https://cdk-kanap.herokuapp.com/api/products')
+fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Trouver l'objet correspondant à l'ID | object._id : API | id : searchParams
