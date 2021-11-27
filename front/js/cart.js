@@ -2,6 +2,7 @@
 let cartItems = document.querySelector('#cart__items')
 // Récupère les données du localStorage
 let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 // Crée un tableau produit vide
 let products = []
 
@@ -68,15 +69,16 @@ fetch('http://localhost:3000/api/products')
 					)
 					// DOM
 					pickArticle[index].remove()
-					console.log(pickArticle)
 
 					cart()
 					total()
 					location.reload()
 				})
 			})
-			if (!saveProductLocalStorage[0]) {
-				localStorage.removeItem('product')
+			if (document.URL.includes('cart.html')) {
+				if (!saveProductLocalStorage[0]) {
+					localStorage.removeItem('product')
+				}
 			}
 		}
 
@@ -149,7 +151,6 @@ fetch('http://localhost:3000/api/products')
 						text.innerHTML = 'Merci de rentrer un prénom valide'
 						text.style.color = '#fbbcbc'
 					}
-					localStorage.removeItem('contact')
 				}
 				if (firstName == '') {
 					text.innerHTML = ''
@@ -174,7 +175,6 @@ fetch('http://localhost:3000/api/products')
 						text.innerHTML = 'Merci de rentrer un nom valide'
 						text.style.color = '#fbbcbc'
 					}
-					localStorage.removeItem('contact')
 				}
 				if (lastName == '') {
 					text.innerHTML = ''
@@ -194,7 +194,6 @@ fetch('http://localhost:3000/api/products')
 					text.innerHTML =
 						'Merci de rentrer une adresse valide : numéro voie code postal'
 					text.style.color = '#fbbcbc'
-					localStorage.removeItem('contact')
 				}
 				if (address == '') {
 					text.innerHTML = ''
@@ -213,7 +212,6 @@ fetch('http://localhost:3000/api/products')
 				} else {
 					text.innerHTML = 'Merci de rentrer une ville valide'
 					text.style.color = '#fbbcbc'
-					localStorage.removeItem('contact')
 				}
 				if (city == '') {
 					text.innerHTML = ''
@@ -239,30 +237,32 @@ fetch('http://localhost:3000/api/products')
 				} else {
 					text.innerHTML = 'Merci de rentrer une adresse valide'
 					text.style.color = '#fbbcbc'
-					localStorage.removeItem('contact')
 				}
 				if (mail == '') {
 					text.innerHTML = ''
 				}
 			}
 
-			// Crée l'objet contact, les valeurs sont vérifiés par les fonctions
-			const contact = {
-				firstName: validFirstName(),
-				lastName: validLastName(),
-				address: validAdress(),
-				city: validCity(),
-				email: validEmail(),
-			}
+			// Appels pour alertes sur DOM
+			validFirstName()
+			validLastName()
+			validAdress()
+			validCity()
+			validEmail()
 
 			// *** Objet vers localStorage
 			let sendContact = document.querySelector('#order')
 			sendContact.addEventListener('click', (e) => {
 				e.preventDefault()
 
-				let saveContactLocalStorage = JSON.parse(
-					localStorage.getItem('contact')
-				)
+				// Création de l'objet contact | Les valeurs sont vérifiés par les fonctions
+				let contact = {
+					firstName: validFirstName(),
+					lastName: validLastName(),
+					address: validAdress(),
+					city: validCity(),
+					email: validEmail(),
+				}
 
 				// Ajoute le nouveau contact
 				let addContactLocalStorage = () => {
@@ -322,7 +322,7 @@ fetch('http://localhost:3000/api/products')
 				promiseOne.then(async (response) => {
 					try {
 						const content = await response.json()
-						console.log('content ', content)
+						// console.log('content ', content)
 
 						if (response.ok) {
 							// Aller vers la page confirmation
