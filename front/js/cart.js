@@ -21,6 +21,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 				for (let i in saveProductLocalStorage) {
 					let id = saveProductLocalStorage[i]._id
 					let myObject = findObject(id)
+					let price = myObject.price * saveProductLocalStorage[i].qty
 
 					cartItems.innerHTML += `
 						<article class="cart__item" data-id="${saveProductLocalStorage[i]._id}" data-color="${saveProductLocalStorage[i].colors}">
@@ -31,7 +32,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
               	<div class="cart__item__content__description">
                 	<h2>${myObject.name}</h2>
                 	<p>${saveProductLocalStorage[i].colors}</p>
-                	<p>${myObject.price}</p>
+                	<p class="priceProduct">${price} €</p>
               	</div>
               	<div class="cart__item__content__settings">
                 	<div class="cart__item__content__settings__quantity">
@@ -68,6 +69,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 						'product',
 						JSON.stringify(saveProductLocalStorage)
 					)
+
 					// DOM
 					pickArticle[index].remove()
 
@@ -76,11 +78,6 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 					location.reload()
 				})
 			})
-			if (document.URL.includes('cart.html')) {
-				if (!saveProductLocalStorage[0]) {
-					localStorage.removeItem('product')
-				}
-			}
 		}
 
 		// *** Modifie la quantité d'un produit
@@ -98,8 +95,21 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 						'product',
 						JSON.stringify(saveProductLocalStorage)
 					)
+
+					let priceProduct = document.getElementsByClassName('priceProduct')
+
+					let oneItemTotal = () => {
+						let id = saveProductLocalStorage[index]._id
+						let myObject = findObject(id)
+						let price = myObject.price * saveProductLocalStorage[index].qty
+						priceProduct[index].innerHTML = `${price} €`
+					}
+
+					oneItemTotal()
 					cart()
 					total()
+
+					console.log(index)
 				})
 			})
 		}
@@ -137,7 +147,9 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			function validFirstName() {
 				let firstName = document.getElementById('firstName').value
 				let text = document.getElementById('firstNameErrorMsg')
-				let pattern = /^[a-zA-Z\-]+$/
+				// Prends en compte les accents
+				let pattern =
+					/^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
 				let number = /^[a-zA-Z\-1-9]+$/
 
 				if (firstName.match(pattern)) {
@@ -161,7 +173,8 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			function validLastName() {
 				let lastName = document.getElementById('lastName').value
 				let text = document.getElementById('lastNameErrorMsg')
-				let pattern = /^[a-zA-Z\-]+$/
+				let pattern =
+					/^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
 				let number = /^[a-zA-Z\-1-9]+$/
 
 				if (lastName.match(pattern)) {
@@ -329,7 +342,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 						const content = await response.json()
 						// console.log('content ', content)
 
-						if (response.ok) {
+						if (response.ok && saveProductLocalStorage) {
 							// Aller vers la page confirmation
 							window.location = `../html/confirmation.html?id=${content.orderId}`
 							localStorage.clear()

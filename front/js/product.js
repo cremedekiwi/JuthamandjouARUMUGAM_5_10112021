@@ -16,6 +16,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 		// *** Ajoute les valeurs dans le DOM
 		let injectHtml = () => {
 			// Sélecteurs
+			let productName = document.getElementsByTagName('title')
 			let image = document.querySelector('.item__img')
 			let title = document.querySelector('#title')
 			let price = document.querySelector('#price')
@@ -23,6 +24,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			let colors = document.querySelector('#colors')
 
 			// Affectations
+			productName[0].innerHTML = myObject.name
 			image.innerHTML = `<img src="${myObject.imageUrl}" alt="${myObject.altTxt}">`
 			title.innerHTML = myObject.name
 			price.innerHTML = myObject.price
@@ -60,9 +62,42 @@ let createProduct = () => {
 
 	// *** Modifie un produit sélectionné dans le localStorage
 	let modifyProductLocalStorage = (index) => {
-		saveProductLocalStorage[index].qty = optionProduct.qty
+		saveProductLocalStorage[index].qty = parseInt(
+			saveProductLocalStorage[index].qty
+		)
+		optionProduct.qty = parseInt(optionProduct.qty)
+		saveProductLocalStorage[index].qty += optionProduct.qty
 		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
 		console.log('Modifie la quantité')
+	}
+
+	// *** Notification ajout produit
+	let notification = document.querySelector('.item__content__addButton')
+	let deleteNotif = document.querySelector('#notif')
+	let notifAdd = () => {
+		notification.insertAdjacentHTML(
+			'afterend',
+			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>L'article a bien été ajouté</span>`
+		)
+
+		let deleteNotif = document.querySelector('#notif')
+
+		setTimeout(function () {
+			deleteNotif.remove()
+		}, 1000)
+	}
+
+	let notifError = () => {
+		notification.insertAdjacentHTML(
+			'afterend',
+			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de choisir une couleur et d'indiquer un nombre d'article</span>`
+		)
+
+		let deleteNotif = document.querySelector('#notif')
+
+		setTimeout(function () {
+			deleteNotif.remove()
+		}, 2500)
 	}
 
 	// SI la couleur est non renseignée OU que la quantité est inférieur ou égal à 0 OU supérieur à 100 : ne rien faire
@@ -71,12 +106,14 @@ let createProduct = () => {
 		optionProduct.qty <= 0 ||
 		optionProduct.qty > 100
 	) {
+		notifError()
 		console.log('Ne rien faire')
 	} else {
 		// SI pas de produit dans le localStorage, crée le tableau et ajoute le produit
 		if (!saveProductLocalStorage) {
 			saveProductLocalStorage = []
 			addProductLocalStorage()
+			notifAdd()
 			console.log('Crée le tableau avec le premier produit')
 			cart()
 		}
@@ -88,11 +125,13 @@ let createProduct = () => {
 			// SI le produit existe déjà, modifie la quantité
 			if (index !== -1) {
 				modifyProductLocalStorage(index)
+				notifAdd()
 				cart()
 			}
 			// SINON ajoute le produit
 			else {
 				addProductLocalStorage()
+				notifAdd()
 				console.log('Ajoute le produit')
 				cart()
 			}
@@ -122,3 +161,18 @@ let cart = () => {
 }
 
 cart()
+
+// Si l'ID n'existe pas dans l'API, redirger vers la page d'accueil
+fetch('https://cdk-kanap.herokuapp.com/api/products')
+	.then((response) => response.json())
+	.then((data) => {
+		for (let i in data) {
+			if (data[i]._id == idProduct) {
+				console.log('ok')
+				return
+			} else {
+				window.location.href = 'index.html'
+				console.log('redirect')
+			}
+		}
+	})
