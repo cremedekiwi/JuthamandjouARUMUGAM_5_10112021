@@ -1,5 +1,5 @@
-// fetch('https://cdk-kanap.herokuapp.com/api/products')
-fetch('http://localhost:3000/api/products')
+// fetch('http://localhost:3000/api/products')
+fetch('https://cdk-kanap.herokuapp.com/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Affiche tout les produits
