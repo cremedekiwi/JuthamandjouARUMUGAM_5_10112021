@@ -55,23 +55,21 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 
 		// *** Supprimer un produit
 		let deleteProduct = () => {
-			// Stock dans un tableaux les éléments du DOM à supprimer
-			let deleteItemContainer = [
-				...document.getElementsByClassName('deleteItem'),
-			]
-			// Supprime le produit
-			deleteItemContainer.forEach((element, index) => {
+			// Stock dans un tableau les boutons supprimer du DOM
+			let deleteButton = [...document.querySelectorAll('.deleteItem')]
+			let ls = saveProductLocalStorage
+
+			// Ecoute le click sur tout les boutons supprimer
+			deleteButton.forEach((element, index) => {
 				element.addEventListener('click', () => {
-					console.log(index)
-					// localStorage
-					saveProductLocalStorage.splice(index, 1)
-					localStorage.setItem(
-						'product',
-						JSON.stringify(saveProductLocalStorage)
-					)
+					// Supprime dans le localStorage la ligne
+					ls.splice(index, 1)
+					localStorage.setItem('product', JSON.stringify(ls))
 
 					cart()
 					total()
+
+					// Recharge la page pour mettre à jour les index du DOM
 					location.reload()
 				})
 			})
@@ -86,7 +84,7 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			// Modifie la quantité
 			quantityContainer.forEach((item, index) => {
 				// Au click, modifie l'item sur le LocalStorage
-				item.addEventListener('click', () => {
+				item.addEventListener('change', () => {
 					saveProductLocalStorage[index].qty = quantityContainer[index].value
 					localStorage.setItem(
 						'product',

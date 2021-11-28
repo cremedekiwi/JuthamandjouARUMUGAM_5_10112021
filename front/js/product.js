@@ -44,15 +44,15 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 let createProduct = () => {
 	let quantity = document.querySelector('#quantity')
 
+	// Crée l'objet dans le localStorage
+	// Lecture du localStorage
+	let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
+
 	let optionProduct = {
 		_id: idProduct,
 		qty: quantity.value,
 		colors: colors.value,
 	}
-
-	// Crée l'objet dans le localStorage
-	// Lecture du localStorage
-	let saveProductLocalStorage = JSON.parse(localStorage.getItem('product'))
 
 	// *** Ajoute un produit sélectionné dans le localStorage
 	let addProductLocalStorage = () => {
@@ -66,6 +66,15 @@ let createProduct = () => {
 			saveProductLocalStorage[index].qty
 		)
 		optionProduct.qty = parseInt(optionProduct.qty)
+
+		// Ne rajoute pas la quantité si le local storage est déjà à 100
+		if (saveProductLocalStorage[index].qty >= 100) {
+			optionProduct.qty = ''
+			notifHundread()
+		} else {
+			notifAdd()
+		}
+
 		saveProductLocalStorage[index].qty += optionProduct.qty
 		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
 		console.log('Modifie la quantité')
@@ -89,12 +98,35 @@ let createProduct = () => {
 		deleteNotif()
 	}
 
-	let notifError = () => {
+	let notifHundread = () => {
 		notification.insertAdjacentHTML(
 			'afterend',
-			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de choisir une couleur et d'indiquer un nombre d'article</span>`
+			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Votre total de cette article excéde 100</span>`
 		)
 		deleteNotif()
+	}
+
+	let notifError = () => {
+		if (optionProduct.colors == '') {
+			notification.insertAdjacentHTML(
+				'afterend',
+				`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de choisir une couleur</span>`
+			)
+			deleteNotif()
+		}
+		if (optionProduct.qty <= 0) {
+			notification.insertAdjacentHTML(
+				'afterend',
+				`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de choisir une quantité</span>`
+			)
+			deleteNotif()
+		} else if (optionProduct.qty > 100) {
+			notification.insertAdjacentHTML(
+				'afterend',
+				`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de rentrer un nombre inférieur à 100</span>`
+			)
+			deleteNotif()
+		}
 	}
 
 	// SI la couleur est non renseignée OU que la quantité est inférieur ou égal à 0 OU supérieur à 100 : ne rien faire
@@ -122,7 +154,6 @@ let createProduct = () => {
 			// SI le produit existe déjà, modifie la quantité
 			if (index !== -1) {
 				modifyProductLocalStorage(index)
-				notifAdd()
 				cart()
 			}
 			// SINON ajoute le produit
