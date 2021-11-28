@@ -6,8 +6,8 @@ let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 // Crée un tableau produit vide
 let products = []
 
-// fetch('http://localhost:3000/api/products')
-fetch('https://cdk-kanap.herokuapp.com/api/products')
+// fetch('https://cdk-kanap.herokuapp.com/api/products')
+fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Trouver l'objet correspondant à l'ID | object._id : API | id : searchParams
@@ -85,6 +85,9 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			quantityContainer.forEach((item, index) => {
 				// Au click, modifie l'item sur le LocalStorage
 				item.addEventListener('change', () => {
+					if (quantityContainer[index].value > 100) {
+						quantityContainer[index].value = 100
+					}
 					saveProductLocalStorage[index].qty = quantityContainer[index].value
 					localStorage.setItem(
 						'product',
@@ -317,17 +320,16 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 					products,
 				}
 
-				// const promiseOne = fetch('http://localhost:3000/api/products/order', {
-				const promiseOne = fetch(
-					'https://cdk-kanap.herokuapp.com/api/products/order',
-					{
-						method: 'POST',
-						body: JSON.stringify(toSend),
-						headers: {
-							'Content-type': 'application/json',
-						},
-					}
-				)
+				// const promiseOne = fetch(
+				// 	'https://cdk-kanap.herokuapp.com/api/products/order',
+				// 	{
+				const promiseOne = fetch('http://localhost:3000/api/products/order', {
+					method: 'POST',
+					body: JSON.stringify(toSend),
+					headers: {
+						'Content-type': 'application/json',
+					},
+				})
 
 				// Pour voir le résultat du serveur dans la console
 				promiseOne.then(async (response) => {
@@ -368,9 +370,8 @@ let cart = () => {
 }
 
 // *** Confirmation du numéro de commande
+const orderId = new URL(window.location.href).searchParams.get('id')
 let showCommand = () => {
-	const orderId = new URL(window.location.href).searchParams.get('id')
-
 	const idSelector = document.querySelector('#orderId')
 	if (document.URL.includes('confirmation.html')) {
 		idSelector.innerHTML = orderId

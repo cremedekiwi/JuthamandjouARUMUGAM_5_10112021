@@ -2,8 +2,8 @@
 let idProduct = new URL(window.location.href).searchParams.get('id')
 
 // *** Connextion API
-// fetch('http://localhost:3000/api/products')
-fetch('https://cdk-kanap.herokuapp.com/api/products')
+// fetch('https://cdk-kanap.herokuapp.com/api/products')
+fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Trouver l'objet correspondant à l'ID : object._id vient de l'API && idProduct vient du searchParams
@@ -58,6 +58,7 @@ let createProduct = () => {
 	let addProductLocalStorage = () => {
 		saveProductLocalStorage.push(optionProduct)
 		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
+		notifAdd()
 	}
 
 	// *** Modifie un produit sélectionné dans le localStorage
@@ -68,16 +69,16 @@ let createProduct = () => {
 		optionProduct.qty = parseInt(optionProduct.qty)
 
 		// Ne rajoute pas la quantité si le local storage est déjà à 100
-		if (saveProductLocalStorage[index].qty >= 100) {
-			optionProduct.qty = ''
-			notifHundread()
-		} else {
-			notifAdd()
-		}
-
 		saveProductLocalStorage[index].qty += optionProduct.qty
-		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
 		console.log('Modifie la quantité')
+		notifAdd()
+		if (saveProductLocalStorage[index].qty > 100) {
+			saveProductLocalStorage[index].qty = 100
+			optionProduct.qty = 0
+			console.log('Limite à 100')
+			notifHundread()
+		}
+		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
 	}
 
 	// *** Notifications
@@ -142,7 +143,6 @@ let createProduct = () => {
 		if (!saveProductLocalStorage) {
 			saveProductLocalStorage = []
 			addProductLocalStorage()
-			notifAdd()
 			console.log('Crée le tableau avec le premier produit')
 			cart()
 		}
@@ -159,7 +159,6 @@ let createProduct = () => {
 			// SINON ajoute le produit
 			else {
 				addProductLocalStorage()
-				notifAdd()
 				console.log('Ajoute le produit')
 				cart()
 			}
@@ -189,3 +188,23 @@ let cart = () => {
 }
 
 cart()
+
+// *** Sécurité : si ID différent de l'API, on est redirigé à l'accueil
+fetch('http://localhost:3000/api/products')
+	.then((response) => response.json())
+	.then((data) => {
+		if (
+			idProduct == data[0]._id ||
+			idProduct == data[1]._id ||
+			idProduct == data[2]._id ||
+			idProduct == data[3]._id ||
+			idProduct == data[4]._id ||
+			idProduct == data[5]._id ||
+			idProduct == data[6]._id ||
+			idProduct == data[7]._id
+		) {
+			return
+		} else {
+			window.location.href = 'index.html'
+		}
+	})
