@@ -6,8 +6,8 @@ let saveContactLocalStorage = JSON.parse(localStorage.getItem('contact'))
 // Crée un tableau produit vide
 let products = []
 
-// fetch('http://localhost:3000/api/products')
-fetch('https://cdk-kanap.herokuapp.com/api/products')
+// fetch('https://cdk-kanap.herokuapp.com/api/products')
+fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Trouver l'objet correspondant à l'ID | object._id : API | id : searchParams
@@ -59,19 +59,16 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 			let deleteItemContainer = [
 				...document.getElementsByClassName('deleteItem'),
 			]
-			let pickArticle = [...document.querySelectorAll(`.cart__item`)]
 			// Supprime le produit
 			deleteItemContainer.forEach((element, index) => {
 				element.addEventListener('click', () => {
+					console.log(index)
 					// localStorage
 					saveProductLocalStorage.splice(index, 1)
 					localStorage.setItem(
 						'product',
 						JSON.stringify(saveProductLocalStorage)
 					)
-
-					// DOM
-					pickArticle[index].remove()
 
 					cart()
 					total()
@@ -108,8 +105,6 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 					oneItemTotal()
 					cart()
 					total()
-
-					console.log(index)
 				})
 			})
 		}
@@ -324,17 +319,16 @@ fetch('https://cdk-kanap.herokuapp.com/api/products')
 					products,
 				}
 
-				// const promiseOne = fetch('http://localhost:3000/api/products/order', {
-				const promiseOne = fetch(
-					'https://cdk-kanap.herokuapp.com/api/products/order',
-					{
-						method: 'POST',
-						body: JSON.stringify(toSend),
-						headers: {
-							'Content-type': 'application/json',
-						},
-					}
-				)
+				// const promiseOne = fetch(
+				// 	'https://cdk-kanap.herokuapp.com/api/products/order',
+				// 	{
+				const promiseOne = fetch('http://localhost:3000/api/products/order', {
+					method: 'POST',
+					body: JSON.stringify(toSend),
+					headers: {
+						'Content-type': 'application/json',
+					},
+				})
 
 				// Pour voir le résultat du serveur dans la console
 				promiseOne.then(async (response) => {

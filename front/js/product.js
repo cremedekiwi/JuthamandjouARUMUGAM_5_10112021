@@ -2,8 +2,8 @@
 let idProduct = new URL(window.location.href).searchParams.get('id')
 
 // *** Connextion API
-// fetch('http://localhost:3000/api/products')
-fetch('https://cdk-kanap.herokuapp.com/api/products')
+// fetch('https://cdk-kanap.herokuapp.com/api/products')
+fetch('http://localhost:3000/api/products')
 	.then((response) => response.json())
 	.then((data) => {
 		// *** Trouver l'objet correspondant à l'ID : object._id vient de l'API && idProduct vient du searchParams
@@ -71,20 +71,22 @@ let createProduct = () => {
 		console.log('Modifie la quantité')
 	}
 
-	// *** Notification ajout produit
+	// *** Notifications
 	let notification = document.querySelector('.item__content__addButton')
-	let deleteNotif = document.querySelector('#notif')
+
+	let deleteNotif = () => {
+		let deleteNotif = document.querySelector('#notif')
+		setTimeout(function () {
+			deleteNotif.remove()
+		}, 2000)
+	}
+
 	let notifAdd = () => {
 		notification.insertAdjacentHTML(
 			'afterend',
 			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>L'article a bien été ajouté</span>`
 		)
-
-		let deleteNotif = document.querySelector('#notif')
-
-		setTimeout(function () {
-			deleteNotif.remove()
-		}, 1000)
+		deleteNotif()
 	}
 
 	let notifError = () => {
@@ -92,12 +94,7 @@ let createProduct = () => {
 			'afterend',
 			`<span id ="notif" style="text-align: center; font-weight: bold;"><br>Merci de choisir une couleur et d'indiquer un nombre d'article</span>`
 		)
-
-		let deleteNotif = document.querySelector('#notif')
-
-		setTimeout(function () {
-			deleteNotif.remove()
-		}, 2500)
+		deleteNotif()
 	}
 
 	// SI la couleur est non renseignée OU que la quantité est inférieur ou égal à 0 OU supérieur à 100 : ne rien faire
@@ -161,18 +158,3 @@ let cart = () => {
 }
 
 cart()
-
-// Si l'ID n'existe pas dans l'API, redirger vers la page d'accueil
-fetch('https://cdk-kanap.herokuapp.com/api/products')
-	.then((response) => response.json())
-	.then((data) => {
-		for (let i in data) {
-			if (data[i]._id == idProduct) {
-				console.log('ok')
-				return
-			} else {
-				window.location.href = 'index.html'
-				console.log('redirect')
-			}
-		}
-	})
