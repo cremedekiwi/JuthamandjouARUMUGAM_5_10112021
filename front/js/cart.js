@@ -57,20 +57,34 @@ fetch('http://localhost:3000/api/products')
 		let deleteProduct = () => {
 			// Stock dans un tableau les boutons supprimer du DOM
 			let deleteButton = [...document.querySelectorAll('.deleteItem')]
+			let deleteArticle = [...document.querySelectorAll('.cart__item')]
 			let ls = saveProductLocalStorage
 
 			// Ecoute le click sur tout les boutons supprimer
 			deleteButton.forEach((element, index) => {
 				element.addEventListener('click', () => {
-					// Supprime dans le localStorage la ligne
-					ls.splice(index, 1)
-					localStorage.setItem('product', JSON.stringify(ls))
+					// Chercher l'index via la couleur et l'id du dataset
+					let indexDom = saveProductLocalStorage.findIndex(
+						(e) =>
+							e.colors === deleteArticle[index].dataset.color &&
+							e._id === deleteArticle[index].dataset.id
+					)
+
+					if (indexDom !== -1) {
+						// Supprime dans le localStorage
+						ls.splice(indexDom, 1)
+						localStorage.setItem('product', JSON.stringify(ls))
+						// Supprime sur le DOM
+						deleteArticle[index].remove()
+						// Si tableau vide, supprimer
+						if (saveProductLocalStorage == '') {
+							localStorage.removeItem('product')
+							products = ''
+						}
+					}
 
 					cart()
 					total()
-
-					// Recharge la page pour mettre à jour les index du DOM
-					location.reload()
 				})
 			})
 		}
@@ -284,7 +298,6 @@ fetch('http://localhost:3000/api/products')
 						'contact',
 						JSON.stringify(saveContactLocalStorage)
 					)
-					console.log('Crée le tableau')
 				}
 
 				// Modifie le contact
@@ -294,7 +307,6 @@ fetch('http://localhost:3000/api/products')
 						'contact',
 						JSON.stringify(saveContactLocalStorage)
 					)
-					console.log('Modifie le contact')
 				}
 
 				// Si l'objet a une key non défini, ne pas exécuter le code
