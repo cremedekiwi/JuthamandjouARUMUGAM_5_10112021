@@ -69,16 +69,17 @@ let createProduct = () => {
 		optionProduct.qty = parseInt(optionProduct.qty)
 
 		// Ne rajoute pas la quantité si le local storage est déjà à 100
-		saveProductLocalStorage[index].qty += optionProduct.qty
-		console.log('Modifie la quantité')
-		notifAdd()
-		if (saveProductLocalStorage[index].qty > 100) {
-			saveProductLocalStorage[index].qty = 100
-			optionProduct.qty = 0
+		let sumDomLs = optionProduct.qty + saveProductLocalStorage[index].qty
+
+		if (sumDomLs > 100) {
 			console.log('Limite à 100')
 			notifHundread()
+		} else {
+			saveProductLocalStorage[index].qty += optionProduct.qty
+			localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
+			console.log('Addition')
+			notifAdd()
 		}
-		localStorage.setItem('product', JSON.stringify(saveProductLocalStorage))
 	}
 
 	// *** Notifications

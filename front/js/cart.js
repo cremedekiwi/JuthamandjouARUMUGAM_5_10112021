@@ -87,12 +87,14 @@ fetch('http://localhost:3000/api/products')
 				item.addEventListener('change', () => {
 					if (quantityContainer[index].value > 100) {
 						quantityContainer[index].value = 100
+						console.log('do nothing')
+					} else {
+						saveProductLocalStorage[index].qty = quantityContainer[index].value
+						localStorage.setItem(
+							'product',
+							JSON.stringify(saveProductLocalStorage)
+						)
 					}
-					saveProductLocalStorage[index].qty = quantityContainer[index].value
-					localStorage.setItem(
-						'product',
-						JSON.stringify(saveProductLocalStorage)
-					)
 
 					let priceProduct = document.getElementsByClassName('priceProduct')
 
